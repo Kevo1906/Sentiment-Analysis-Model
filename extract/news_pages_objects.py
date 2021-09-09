@@ -21,7 +21,7 @@ class NewsPage:
 
         response.raise_for_status()
 
-        self._html = html.fromstring(response.content)
+        self._html = html.fromstring(response.content.decode('utf_8'))
 
 class HomePage(NewsPage):
 

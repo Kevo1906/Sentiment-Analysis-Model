@@ -35,10 +35,11 @@ def save_articles(news_site_uid, articles):
     now = datetime.datetime.now().strftime('%Y_%m_%d')
     out_file_name = f'{news_site_uid}_{now}_articles.csv'
     csv_headers = list(filter(lambda property: not property.startswith('_'), dir(articles[0])))
+    
 
     with open(out_file_name, mode='w+') as f:
         writer = csv.writer(f)
-        writer.writenow(csv_headers)
+        writer.writerow(csv_headers)
 
         for article in articles:
             row = [str(getattr(article, prop))for prop in csv_headers]
@@ -49,7 +50,7 @@ def fetch_article(news_site_uid, host, link):
 
     article= None
     try:
-        article = news.ArticlePage(news_site_uid,buil_link(host,link))
+        article = news.ArticlePage(news_site_uid,build_link(host,link))
     except (HTTPError, ConnectionError, MaxRetryError) as e:
         logger.warning('Error while fechting the article', exc_info=False)
 
@@ -77,5 +78,5 @@ if __name__ == '__main__':
                         choices=news_site_choices)
 
     args = parser.parse_args()
-    news_scraper(args)                    
+    news_scraper(args.news_site)                    
      
