@@ -49,8 +49,10 @@ def fetch_article(news_site_uid, host, link):
     logger.info(f'Start fetching article at {link}')
 
     article= None
+    print(build_link(host,link))
     try:
         article = news.ArticlePage(news_site_uid,build_link(host,link))
+        
     except (HTTPError, ConnectionError, MaxRetryError) as e:
         logger.warning('Error while fechting the article', exc_info=False)
 
@@ -61,6 +63,14 @@ def fetch_article(news_site_uid, host, link):
     return article
 
 def build_link(host, link):
+    if host.split("/")[-1] == link.split("/")[1]:
+        link= link.split("/")
+        link.pop(0)
+        link.pop(0)
+        fix_link = ""
+        for l in link:
+            fix_link+= "/" + l
+        link = fix_link
     if is_well_formed_link.match(link):
         return link
     elif is_root_path.match(link):

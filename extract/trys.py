@@ -1,8 +1,12 @@
-import yaml
+host = "https://www.lostiempos.com/actualidad"
+link = "/actualidad/mundo/20210909/eeuu-dice-adios-grandes-intervenciones-militares-aniversario-del-11s"
 
-yaml_file = open("pages.yaml", 'r')
-yaml_content = yaml.load(yaml_file)
+if host.split("/")[-1] == link.split("/")[1]:
+    link= link.split("/")
+    link.pop(0)
+    link.pop(0)
+    fix_link = ""
+    for l in link:
+        fix_link+= "/" + l
 
-print("Key: Value")
-for key, value in yaml_content.items():
-    print(f"{key}: {value}")
+    print(fix_link)
