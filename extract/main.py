@@ -16,18 +16,30 @@ is_well_formed_link = re.compile(r'^https?://.+/.+$')
 is_root_path = re.compile(r'^/.+$')
 
 def news_scraper(news_site_uid):
-    host = config()['sites'][news_site_uid]['url']
-
-    logging.info(f'Beginning scraper for {host}')
-    homepage = news.HomePage(news_site_uid, host)
-
+    hosts = config()['sites'][news_site_uid]['url']
+    print(hosts)
     articles = []
-    for link in homepage.article_links:
-        article = fetch_article(news_site_uid, host, link)
+    if type(hosts) is list:
+        for host in hosts:
+            logging.info(f'Beginning scraper for {host}')
+            homepage = news.HomePage(news_site_uid, host)
 
-        if article:
-            logger.info('Article fetched!!')
-            articles.append(article)
+            for link in homepage.article_links:
+                article = fetch_article(news_site_uid, host, link)
+
+                if article:
+                    logger.info('Article fetched!!')
+                    articles.append(article)
+    else:
+        logging.info(f'Beginning scraper for {hosts}')
+        homepage = news.HomePage(news_site_uid, hosts)
+
+        for link in homepage.article_links:
+            article = fetch_article(news_site_uid, hosts, link)
+
+            if article:
+                logger.info('Article fetched!!')
+                articles.append(article)
 
     save_articles(news_site_uid, articles)
 
@@ -49,7 +61,7 @@ def fetch_article(news_site_uid, host, link):
     logger.info(f'Start fetching article at {link}')
 
     article= None
-    print(build_link(host,link))
+    
     try:
         article = news.ArticlePage(news_site_uid,build_link(host,link))
         
@@ -63,14 +75,16 @@ def fetch_article(news_site_uid, host, link):
     return article
 
 def build_link(host, link):
-    if host.split("/")[-1] == link.split("/")[1]:
-        link= link.split("/")
-        link.pop(0)
-        link.pop(0)
-        fix_link = ""
-        for l in link:
-            fix_link+= "/" + l
-        link = fix_link
+    # Fixing the urls if host and link have repeating parts
+    if not is_well_formed_link.match(link):
+        if host.split("/")[-1] == link.split("/")[1]:
+            link= link.split("/")
+            link.pop(0)
+            link.pop(0)
+            fix_link = ""
+            for l in link:
+                fix_link+= "/" + l
+            link = fix_link
     if is_well_formed_link.match(link):
         return link
     elif is_root_path.match(link):
