@@ -1,7 +1,9 @@
 import lxml.html as html 
 import requests
+import datetime
 
 from load_pages import config
+from utilities import date_formating
 
 class NewsPage:
 
@@ -10,6 +12,11 @@ class NewsPage:
         self._queries = self._config['queries']
         self._html = None
         self._url = url
+        try:
+            self._next_button = self._config['queries']['next_button']
+        except KeyError:
+            self._next_button = None
+        self._dates = self._config['queries']['dates']
         
         self._visit(self._url)
 
@@ -28,14 +35,24 @@ class HomePage(NewsPage):
     def __init__(self, news_site_uid, url):
         super().__init__(news_site_uid, url)
     
+        
     @property
     def article_links(self):
-        link_list = []
-        for link in self._select(self._queries['article_links']):
+        link_list = self._select(self._queries['article_links'])
+        if self._next_button:
+            today_date = str(datetime.date.today())
+            
+            while date_formating(self._select(self._dates)[-1]) == today_date:
+                next_button = self._select(self._next_button)
+                self._visit(next_button[0])
+                link_list.extend(self._select(self._queries['article_links']))
+        
+        clean_link_list = []    
+        for link in link_list:
             if link:
-                link_list.append(link)
-        # review this i think dont need the link.has_attr
-        return link_list
+                clean_link_list.append(link)
+        
+        return clean_link_list
 
 class ArticlePage(NewsPage):
     def __init__(self, news_site_uid, url):
@@ -54,4 +71,9 @@ class ArticlePage(NewsPage):
     @property
     def url(self):
         return self._url
+    
+    @property
+    def date(self):
+        result = self._select(self._queries['article_date'])
+        return result[0]
     

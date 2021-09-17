@@ -49,7 +49,7 @@ def save_articles(news_site_uid, articles):
     csv_headers = list(filter(lambda property: not property.startswith('_'), dir(articles[0])))
     
 
-    with open(out_file_name, mode='w+') as f:
+    with open(f'./data/{out_file_name}', mode='w+') as f:
         writer = csv.writer(f)
         writer.writerow(csv_headers)
 
